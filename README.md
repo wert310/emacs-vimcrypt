@@ -1,2 +1,2 @@
 # emacs-vimcrypt
-VIM encryption for emacs
+VIM encryption for emacs (WIP)
