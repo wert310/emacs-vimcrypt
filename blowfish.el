@@ -62,13 +62,13 @@
 
 (defconst Sbox
   [[ #xd1310ba6 #x98dfb5ac #x2ffd72db #xd01adfb7 #xb8e1afed #x6a267e96
-     #xba7c9045 #xf12c7f99 #x24a19947 #xb3916cf7 #x0801f2e2 #x858efc16 
+     #xba7c9045 #xf12c7f99 #x24a19947 #xb3916cf7 #x0801f2e2 #x858efc16
      #x636920d8 #x71574e69 #xa458fea3 #xf4933d7e #x0d95748f #x728eb658
-     #x718bcd58 #x82154aee #x7b54a41d #xc25a59b5 #x9c30d539 #x2af26013 
+     #x718bcd58 #x82154aee #x7b54a41d #xc25a59b5 #x9c30d539 #x2af26013
      #xc5d1b023 #x286085f0 #xca417918 #xb8db38ef #x8e79dcb0 #x603a180e
-     #x6c9e0e8b #xb01e8a3e #xd71577c1 #xbd314b27 #x78af2fda #x55605c60 
+     #x6c9e0e8b #xb01e8a3e #xd71577c1 #xbd314b27 #x78af2fda #x55605c60
      #xe65525f3 #xaa55ab94 #x57489862 #x63e81440 #x55ca396a #x2aab10b6
-     #xb4cc5c34 #x1141e8ce #xa15486af #x7c72e993 #xb3ee1411 #x636fbc2a 
+     #xb4cc5c34 #x1141e8ce #xa15486af #x7c72e993 #xb3ee1411 #x636fbc2a
      #x2ba9c55d #x741831f6 #xce5c3e16 #x9b87931e #xafd6ba33 #x6c24cf5c
      #x7a325381 #x28958677 #x3b8f4898 #x6b4bb9af #xc4bfe81b #x66282193
      #x61d809cc #xfb21a991 #x487cac60 #x5dec8032 #xef845d5d #xe98575b1
@@ -245,7 +245,7 @@
             (+ (aref (aref S 0) (ash x -24))
                (aref (aref S 1) (logand (ash x -16) #xff)))
             #xffffffff)))
-    (logand 
+    (logand
      (+ (logxor h (aref (aref S 2) (logand (ash x -8) #xff)))
         (aref (aref S 3) (logand x #xff)))
      #xffffffff)))
@@ -321,5 +321,5 @@
     (blowfish-decrypt bb (blowfish-encrypt bb "12345678"))))
 
 
-(provide 'bowfish)
-;;; bowfish.el end here 
+(provide 'blowfish)
+;;; blowfish.el end here
