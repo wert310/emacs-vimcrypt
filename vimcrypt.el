@@ -31,29 +31,62 @@
 (require 'cl)
 (require 'blowfish)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Utils
 
-(defun derive-key (password salt)
+(defun vimcrypt-swap-endianness (data)
+  (apply #'concat
+         (loop for i from 0 to (1- (/ (length data) 4))
+               collecting (reverse (substring data (* i 4) (+ (* i 4) 4))))))
+
+(defun vimcrypt-swapped-encrypt (bf data)
+  (vimcrypt-swap-endianness
+   (blowfish-encrypt bb (vimcrypt-swap-endianness data))))
+
+(defun vimcrypt-zero-pad (data)
+  (let ((qty (mod (length data) 4)))
+    (cond ((zerop qty) data)
+          (t (concat data (make-string (- 4 qty) 0))))))
+
+(defun vimcrypt-derive-key (password salt)
   (let ((key (secure-hash 'sha256 (concat password salt))))
     (dotimes (i 1000)
       (setf key (secure-hash 'sha256 (concat key salt))))
     (blowfish-decode-hex key)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; blowfish CFB
 
 (defstruct vimcrypt-cfb
-  cipher iv version)
+  cipher iv test update)
+
+(defun vimcrypt-bad-cfb (key iv)
+  (make-vimcrypt-cfb
+   :cypher (blowfish-init (derive-key key)) :iv iv
+   :test (lambda (i) (and (>= i 64) (zerop (mod i 8))))
+   :update (lambda (bf data i)
+             (vimcrypt-swapped-encrypt (vimcrypt-cfb-cipher bf)
+                               (substring data (- i 64) (+ 8 (- i 64)))))))
+
+(defun vimcrypt-fixed-cfb (key iv)
+  (make-vimcrypt-cfb
+   :cypher (blowfish-init (derive-key key)) :iv iv
+   :test (lambda (i) (zerop (mod i 8)))
+   :update (lambda (bf data i)
+             (let ((xor (vimcrypt-swapped-encrypt (vimcrypt-cfb-cipher bf)
+                                                  (vimcrypt-cfb-iv bf))))
+               (setf (vimcrypt-cfb-iv bf) (substring data i (+ i 8)))
+               xor))))
 
 (defmethod vimcrypt-decrypt ((bf vimcrypt-cbf) data)
   (loop with plain = nil
-        with xor = (blowfish-encrypt (vimcrypt-cfb-cipher bf) (vimcrypt-cbf-iv bf))
+        with xor = (vimcrypt-swapped-encrypt (vimcrypt-cfb-cipher bf)
+                                             (vimcrypt-cbf-iv bf))
         for i from 0 to (length data)
-        if (and (or (and (= 1 vimcrypt-cbf-version) (>= i 64)) ; bf1 bad cfb
-                    (= 2 vimcrypt-cbf-version))                ; bf2 good cfb
-                    (zerop (mod i 8)))
-        do (setf xor (blowfish-encrypt (vimcrypt-cfb-cipher bf)
-                                       (substring (- i 64) (+ 8 (- i 64)))))
+        if (funcall (vimcrypt-cfb-test bf))
+        do (setf xor (funcall (vimcrypt-cfb-update bf data i)))
         collecting (logxor (aref xor (mod i 8)) (aref data i)) into plain
         finally (return (apply #'string plain))))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TEST
@@ -62,8 +95,12 @@
 
 (blowfish-encode-hex
  (blowfish-encrypt bb "plaintxt"))
-; 72503b38106022a7
 
+(blowfish-encode-hex
+ (vimcrypt-swapped-encrypt bb "plaintxt"))
+
+; 72503b38106022a7
+; ad3dfa7fe8ea40f6
 
 (provide 'vimcrypt)
 ;; vimcrypt.el ends here
