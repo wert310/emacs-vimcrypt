@@ -50,6 +50,9 @@
   (assert (= n (logand n #xffffffff)))
   (bindat-pack '((:v u32)) `((:v . ,n))))
 
+(defun blowfish-encode-hex (str)
+  (apply #'concat (loop for ch across str collect (format "%x" ch))))
+
 (defun blowfish-decode-hex (str)
   (loop with res = nil
         for i from 0 to (1- (/ (length str) 2))
@@ -104,48 +107,48 @@
      #xd60f573f #xbc9bc6e4 #x2b60a476 #x81e67400 #x08ba6fb5 #x571be91f
      #xf296ec6b #x2a0dd915 #xb6636521 #xe7b9f9b6 #xff34052e #xc5855664
      #x53b02d5d #xa99f8fa1 #x08ba4799 #x6e85076a ]
-   [ #x4b7a70e9 #xb5b32944 #xdb75092e #xc4192623  #xad6ea6b0 #x49a7df7d
-     #x9cee60b8 #x8fedb266  #xecaa8c71 #x699a17ff #x5664526c #xc2b19ee1
-     #x193602a5 #x75094c29 #xa0591340 #xe4183a3e  #x3f54989a #x5b429d65
-     #x6b8fe4d6 #x99f73fd6  #xa1d29c07 #xefe830f5 #x4d2d38e6 #xf0255dc1
-     #x4cdd2086 #x8470eb26 #x6382e9c6 #x021ecc5e  #x09686b3f #x3ebaefc9
-     #x3c971814 #x6b6a70a1  #x687f3584 #x52a0e286 #xb79c5305 #xaa500737
-     #x3e07841c #x7fdeae5c #x8e7d44ec #x5716f2b8  #xb03ada37 #xf0500c0d
-     #xf01c1f04 #x0200b3ff  #xae0cf51a #x3cb574b2 #x25837a58 #xdc0921bd
-     #xd19113f9 #x7ca92ff6 #x94324773 #x22f54701  #x3ae5e581 #x37c2dadc
-     #xc8b57634 #x9af3dda7  #xa9446146 #x0fd0030e #xecc8c73e #xa4751e41
-     #xe238cd99 #x3bea0e2f #x3280bba1 #x183eb331  #x4e548b38 #x4f6db908
-     #x6f420d03 #xf60a04bf  #x2cb81290 #x24977c79 #x5679b072 #xbcaf89af
-     #xde9a771f #xd9930810 #xb38bae12 #xdccf3f2e  #x5512721f #x2e6b7124
-     #x501adde6 #x9f84cd87  #x7a584718 #x7408da17 #xbc9f9abc #xe94b7d8c
-     #xec7aec3a #xdb851dfa #x63094366 #xc464c3d2  #xef1c1847 #x3215d908
-     #xdd433b37 #x24c2ba16  #x12a14d43 #x2a65c451 #x50940002 #x133ae4dd
-     #x71dff89e #x10314e55 #x81ac77d6 #x5f11199b  #x043556f1 #xd7a3c76b
-     #x3c11183b #x5924a509  #xf28fe6ed #x97f1fbfa #x9ebabf2c #x1e153c6e
-     #x86e34570 #xeae96fb1 #x860e5e0a #x5a3e2ab3  #x771fe71c #x4e3d06fa
-     #x2965dcb9 #x99e71d0f  #x803e89d6 #x5266c825 #x2e4cc978 #x9c10b36a
-     #xc6150eba #x94e2ea78 #xa5fc3c53 #x1e0a2df4  #xf2f74ea7 #x361d2b3d
-     #x1939260f #x19c27960  #x5223a708 #xf71312b6 #xebadfe6e #xeac31f66
-     #xe3bc4595 #xa67bc883 #xb17f37d1 #x018cff28  #xc332ddef #xbe6c5aa5
-     #x65582185 #x68ab9802  #xeecea50f #xdb2f953b #x2aef7dad #x5b6e2f84
-     #x1521b628 #x29076170 #xecdd4775 #x619f1510  #x13cca830 #xeb61bd96
-     #x0334fe1e #xaa0363cf  #xb5735c90 #x4c70a239 #xd59e9e0b #xcbaade14
-     #xeecc86bc #x60622ca7 #x9cab5cab #xb2f3846e  #x648b1eaf #x19bdf0ca
-     #xa02369b9 #x655abb50  #x40685a32 #x3c2ab4b3 #x319ee9d5 #xc021b8f7
-     #x9b540b19 #x875fa099 #x95f7997e #x623d7da8  #xf837889a #x97e32d77
-     #x11ed935f #x16681281  #x0e358829 #xc7e61fd6 #x96dedfa1 #x7858ba99
-     #x57f584a5 #x1b227263 #x9b83c3ff #x1ac24696  #xcdb30aeb #x532e3054
-     #x8fd948e4 #x6dbc3128  #x58ebf2ef #x34c6ffea #xfe28ed61 #xee7c3c73
-     #x5d4a14d9 #xe864b7e3 #x42105d14 #x203e13e0  #x45eee2b6 #xa3aaabea
-     #xdb6c4f15 #xfacb4fd0  #xc742f442 #xef6abbb5 #x654f3b1d #x41cd2105
-     #xd81e799e #x86854dc7 #xe44b476a #x3d816250  #xcf62a1f2 #x5b8d2646
-     #xfc8883a0 #xc1c7b6a3  #x7f1524c3 #x69cb7492 #x47848a0b #x5692b285
-     #x095bbf00 #xad19489d #x1462b174 #x23820e00  #x58428d2a #x0c55f5ea
-     #x1dadf43e #x233f7061  #x3372f092 #x8d937e41 #xd65fecf1 #x6c223bdb
-     #x7cde3759 #xcbee7460 #x4085f2a7 #xce77326e  #xa6078084 #x19f8509e
-     #xe8efd855 #x61d99735  #xa969a7aa #xc50c06c2 #x5a04abfc #x800bcadc
-     #x9e447a2e #xc3453484 #xfdd56705 #x0e1e9ec9  #xdb73dbd3 #x105588cd
-     #x675fda79 #xe3674340  #xc5c43465 #x713e38d8 #x3d28f89e #xf16dff20
+   [ #x4b7a70e9 #xb5b32944 #xdb75092e #xc4192623 #xad6ea6b0 #x49a7df7d
+     #x9cee60b8 #x8fedb266 #xecaa8c71 #x699a17ff #x5664526c #xc2b19ee1
+     #x193602a5 #x75094c29 #xa0591340 #xe4183a3e #x3f54989a #x5b429d65
+     #x6b8fe4d6 #x99f73fd6 #xa1d29c07 #xefe830f5 #x4d2d38e6 #xf0255dc1
+     #x4cdd2086 #x8470eb26 #x6382e9c6 #x021ecc5e #x09686b3f #x3ebaefc9
+     #x3c971814 #x6b6a70a1 #x687f3584 #x52a0e286 #xb79c5305 #xaa500737
+     #x3e07841c #x7fdeae5c #x8e7d44ec #x5716f2b8 #xb03ada37 #xf0500c0d
+     #xf01c1f04 #x0200b3ff #xae0cf51a #x3cb574b2 #x25837a58 #xdc0921bd
+     #xd19113f9 #x7ca92ff6 #x94324773 #x22f54701 #x3ae5e581 #x37c2dadc
+     #xc8b57634 #x9af3dda7 #xa9446146 #x0fd0030e #xecc8c73e #xa4751e41
+     #xe238cd99 #x3bea0e2f #x3280bba1 #x183eb331 #x4e548b38 #x4f6db908
+     #x6f420d03 #xf60a04bf #x2cb81290 #x24977c79 #x5679b072 #xbcaf89af
+     #xde9a771f #xd9930810 #xb38bae12 #xdccf3f2e #x5512721f #x2e6b7124
+     #x501adde6 #x9f84cd87 #x7a584718 #x7408da17 #xbc9f9abc #xe94b7d8c
+     #xec7aec3a #xdb851dfa #x63094366 #xc464c3d2 #xef1c1847 #x3215d908
+     #xdd433b37 #x24c2ba16 #x12a14d43 #x2a65c451 #x50940002 #x133ae4dd
+     #x71dff89e #x10314e55 #x81ac77d6 #x5f11199b #x043556f1 #xd7a3c76b
+     #x3c11183b #x5924a509 #xf28fe6ed #x97f1fbfa #x9ebabf2c #x1e153c6e
+     #x86e34570 #xeae96fb1 #x860e5e0a #x5a3e2ab3 #x771fe71c #x4e3d06fa
+     #x2965dcb9 #x99e71d0f #x803e89d6 #x5266c825 #x2e4cc978 #x9c10b36a
+     #xc6150eba #x94e2ea78 #xa5fc3c53 #x1e0a2df4 #xf2f74ea7 #x361d2b3d
+     #x1939260f #x19c27960 #x5223a708 #xf71312b6 #xebadfe6e #xeac31f66
+     #xe3bc4595 #xa67bc883 #xb17f37d1 #x018cff28 #xc332ddef #xbe6c5aa5
+     #x65582185 #x68ab9802 #xeecea50f #xdb2f953b #x2aef7dad #x5b6e2f84
+     #x1521b628 #x29076170 #xecdd4775 #x619f1510 #x13cca830 #xeb61bd96
+     #x0334fe1e #xaa0363cf #xb5735c90 #x4c70a239 #xd59e9e0b #xcbaade14
+     #xeecc86bc #x60622ca7 #x9cab5cab #xb2f3846e #x648b1eaf #x19bdf0ca
+     #xa02369b9 #x655abb50 #x40685a32 #x3c2ab4b3 #x319ee9d5 #xc021b8f7
+     #x9b540b19 #x875fa099 #x95f7997e #x623d7da8 #xf837889a #x97e32d77
+     #x11ed935f #x16681281 #x0e358829 #xc7e61fd6 #x96dedfa1 #x7858ba99
+     #x57f584a5 #x1b227263 #x9b83c3ff #x1ac24696 #xcdb30aeb #x532e3054
+     #x8fd948e4 #x6dbc3128 #x58ebf2ef #x34c6ffea #xfe28ed61 #xee7c3c73
+     #x5d4a14d9 #xe864b7e3 #x42105d14 #x203e13e0 #x45eee2b6 #xa3aaabea
+     #xdb6c4f15 #xfacb4fd0 #xc742f442 #xef6abbb5 #x654f3b1d #x41cd2105
+     #xd81e799e #x86854dc7 #xe44b476a #x3d816250 #xcf62a1f2 #x5b8d2646
+     #xfc8883a0 #xc1c7b6a3 #x7f1524c3 #x69cb7492 #x47848a0b #x5692b285
+     #x095bbf00 #xad19489d #x1462b174 #x23820e00 #x58428d2a #x0c55f5ea
+     #x1dadf43e #x233f7061 #x3372f092 #x8d937e41 #xd65fecf1 #x6c223bdb
+     #x7cde3759 #xcbee7460 #x4085f2a7 #xce77326e #xa6078084 #x19f8509e
+     #xe8efd855 #x61d99735 #xa969a7aa #xc50c06c2 #x5a04abfc #x800bcadc
+     #x9e447a2e #xc3453484 #xfdd56705 #x0e1e9ec9 #xdb73dbd3 #x105588cd
+     #x675fda79 #xe3674340 #xc5c43465 #x713e38d8 #x3d28f89e #xf16dff20
      #x153e21e7 #x8fb03d4a #xe6e39f2b #xdb83adf7 ]
    [ #xe93d5a68 #x948140f7 #xf64c261c #x94692934 #x411520f7 #x7602d4f7
      #xbcf46b2e #xd4a20068 #xd4082471 #x3320f46a #x43b7d4b7 #x500061af
@@ -273,7 +276,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Blowfish functions
 
-(defstruct blowfish P S)
+(defstruct blowfish
+  P S)
 
 (defun blowfish-init (key)
   "Make a new blowfish instance using 'key'"
