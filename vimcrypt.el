@@ -64,29 +64,42 @@
   (make-vimcrypt-cfb
    :cypher (blowfish-init (derive-key key)) :iv iv
    :test (lambda (i) (and (>= i 64) (zerop (mod i 8))))
-   :update (lambda (bf data i)
-             (vimcrypt-swapped-encrypt (vimcrypt-cfb-cipher bf)
+   :update (lambda (cfb data i)
+             (vimcrypt-swapped-encrypt (vimcrypt-cfb-cipher cfb)
                                (substring data (- i 64) (+ 8 (- i 64)))))))
 
 (defun vimcrypt-fixed-cfb (key iv)
   (make-vimcrypt-cfb
    :cypher (blowfish-init (derive-key key)) :iv iv
    :test (lambda (i) (zerop (mod i 8)))
-   :update (lambda (bf data i)
-             (let ((xor (vimcrypt-swapped-encrypt (vimcrypt-cfb-cipher bf)
-                                                  (vimcrypt-cfb-iv bf))))
-               (setf (vimcrypt-cfb-iv bf) (substring data i (+ i 8)))
+   :update (lambda (cfb data i)
+             (let ((xor (vimcrypt-swapped-encrypt (vimcrypt-cfb-cipher cfb)
+                                                  (vimcrypt-cfb-iv cfb))))
+               (setf (vimcrypt-cfb-iv cfb) (substring data i (+ i 8)))
                xor))))
 
-(defmethod vimcrypt-decrypt ((bf vimcrypt-cbf) data)
+(defun vimcrypt-cfb-decrypt (cfb data)
   (loop with plain = nil
-        with xor = (vimcrypt-swapped-encrypt (vimcrypt-cfb-cipher bf)
-                                             (vimcrypt-cbf-iv bf))
+        with xor = (vimcrypt-swapped-encrypt (vimcrypt-cfb-cipher cfb)
+                                             (vimcrypt-cbf-iv cfb))
         for i from 0 to (length data)
-        if (funcall (vimcrypt-cfb-test bf))
-        do (setf xor (funcall (vimcrypt-cfb-update bf data i)))
+        if (funcall (vimcrypt-cfb-test cfb))
+        do (setf xor (funcall (vimcrypt-cfb-update cfb data i)))
         collecting (logxor (aref xor (mod i 8)) (aref data i)) into plain
         finally (return (apply #'string plain))))
+
+
+(cl-defun vimcrypt-bf-decrypt (passwd data &key (version 'bf2))
+  (let* ((salt (substring data 0 8))
+         (iv (substring data 8 16))
+         (ciphertext (substring data 16))
+         (key (derive-key passwd salt))
+         (cfb (case version
+                ((bf1) (vimcrypt-bad-cfb key iv))
+                ((bf2) (vimcrypt-fixed-cfb key iv))
+                (t (error "Invalid BF version!")))))
+    (vimcrypt-cfb-decrypt cfb ciphertext)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TEST

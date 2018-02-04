@@ -304,14 +304,14 @@
       (make-blowfish :P P :S S))))
 
 
-(defmethod blowfish-encrypt ((bf blowfish) block)
+(defun blowfish-encrypt (bf block)
   "Encrypt 64bit block using 'bf'"
   (destructuring-bind (L R) (blowfish--32bit-blocks-of block)
     (apply #'concat
            (mapcar #'blowfish--pack-u32
                    (blowfish--encrypt L R (blowfish-P bf) (blowfish-S bf))))))
 
-(defmethod blowfish-decrypt ((bf blowfish) block)
+(defun blowfish-decrypt (bf block)
   "Decrypt 64bit block using 'bf'"
   (destructuring-bind (L R) (blowfish--32bit-blocks-of block)
     (apply #'concat
