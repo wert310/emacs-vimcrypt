@@ -98,7 +98,7 @@
                 ((bf1) (vimcrypt-bad-cfb key iv))
                 ((bf2) (vimcrypt-fixed-cfb key iv))
                 (t (error "Invalid BF version!")))))
-    (vimcrypt-cfb-decrypt cfb ciphertext)))
+    (vimcrypt-cfb-decrypt cfb (zero-pad ciphertext))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
