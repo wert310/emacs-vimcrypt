@@ -86,19 +86,23 @@
         collect (logxor (aref xor (mod i 8)) (aref data i)) into plain
         finally (return (apply #'string plain))))
 
-(cl-defun vimcrypt-bf-decrypt (passwd data &key (version 'bf2))
-  (let* ((salt (substring data 0 8))
+(cl-defun vimcrypt-bf-decrypt (in-passwd in-data &key (version 'bf2))
+  (let* ((passwd (string-to-unibyte in-passwd))
+         (data (string-to-unibyte in-data))
+         (salt (substring data 0 8))
          (iv (substring data 8 16))
          (ciphertext (substring data 16))
          (key (vimcrypt-derive-key passwd salt))
+         (cipher (blowfish-init key))
          (cfb (case version
-                ((bf1) (make-vimcrypt-bad-cfb :key key :iv iv))
-                ((bf2) (make-vimcrypt-fixed-cfb :key key :iv iv))
+                ((bf1) (make-vimcrypt-bad-cfb :cipher cipher :iv iv))
+                ((bf2) (make-vimcrypt-fixed-cfb :cipher cipher :iv iv))
                 (t (error "Invalid BF version!")))))
     (vimcrypt-cfb-decrypt cfb (vimcrypt-zero-pad ciphertext))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TEST
+
 
 (let (bb)
   (setq bb (blowfish-init (vimcrypt-derive-key "password" "salt")))
