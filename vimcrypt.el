@@ -65,11 +65,11 @@
 
 (defmethod vimcrypt-cfb-decrypt ((cfb vimcrypt-bad-cfb) data)
   (loop with plain = nil
-        with xor = (vimcrypt-swapped-encrypt (vimcrypt-cfb-cipher cfb)
-                                             (vimcrypt-cfb-iv cfb))
+        with xor = (vimcrypt-swapped-encrypt (vimcrypt-bad-cfb-cipher cfb)
+                                             (vimcrypt-bad-cfb-iv cfb))
         for i from 0 to (1- (length data))
         if (and (>= i 64) (zerop (mod i 8)))
-        do (setf xor (vimcrypt-swapped-encrypt (vimcrypt-cfb-cipher cfb)
+        do (setf xor (vimcrypt-swapped-encrypt (vimcrypt-bad-cfb-cipher cfb)
                                                (substring data (- i 64) (+ 8 (- i 64)))))
         collect (logxor (aref xor (mod i 8)) (aref data i)) into plain
         finally (return (apply #'string plain))))
@@ -80,9 +80,9 @@
         for i from 0 to (1- (length data))
         if (zerop (mod i 8))
         do (progn
-             (setf xor (vimcrypt-swapped-encrypt (vimcrypt-cfb-cipher cfb)
-                                                 (vimcrypt-cfb-iv cfb)))
-             (setf (vimcrypt-cfb-iv cfb) (substring data i (+ i 8))))
+             (setf xor (vimcrypt-swapped-encrypt (vimcrypt-fixed-cfb-cipher cfb)
+                                                 (vimcrypt-fixed-cfb-iv cfb)))
+             (setf (vimcrypt-fixed-cfb-iv cfb) (substring data i (+ i 8))))
         collect (logxor (aref xor (mod i 8)) (aref data i)) into plain
         finally (return (apply #'string plain))))
 
