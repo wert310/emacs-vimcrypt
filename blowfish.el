@@ -51,7 +51,7 @@
   (bindat-pack '((:v u32)) `((:v . ,n))))
 
 (defun blowfish-encode-hex (str)
-  (apply #'concat (loop for ch across str collect (format "%x" ch))))
+  (apply #'concat (loop for ch across str collect (format "%02x" ch))))
 
 (defun blowfish-decode-hex (str)
   (loop with res = nil
