@@ -126,7 +126,8 @@
              (plain (vimcrypt-decrypt password string)))
         (message "Done.")
         (erase-buffer)
-        (insert plain)))))
+        (insert plain)
+        (goto-char (point-min))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TEST
