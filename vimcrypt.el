@@ -99,7 +99,9 @@
                 ((bf1) (make-vimcrypt-bad-cfb :cipher cipher :iv iv))
                 ((bf2) (make-vimcrypt-fixed-cfb :cipher cipher :iv iv))
                 (t (error "Invalid BF version!")))))
-    (vimcrypt-cfb-decrypt cfb (vimcrypt-zero-pad ciphertext))))
+    (substring
+     (vimcrypt-cfb-decrypt cfb (vimcrypt-zero-pad ciphertext))
+     0 (length ciphertext))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Toplevel Functions
