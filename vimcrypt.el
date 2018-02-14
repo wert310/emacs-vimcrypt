@@ -86,6 +86,7 @@
         collect (logxor (aref xor (mod i 8)) (aref data i)) into plain
         finally (return (apply #'string plain))))
 
+
 (cl-defun vimcrypt-bf-decrypt (in-passwd in-data &key (version 'bf2))
   (let* ((passwd (string-to-unibyte in-passwd))
          (data (string-to-unibyte in-data))
@@ -101,8 +102,32 @@
     (vimcrypt-cfb-decrypt cfb (vimcrypt-zero-pad ciphertext))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; TEST
+;; Toplevel Functions
 
+(defun vimcrypt-decrypt (in-passwd in-data)
+  (let ((magic (substring in-data 0 12)))
+    (cond ((equal magic "VimCrypt~03!")
+           (vimcrypt-bf-decrypt in-passwd (substring in-data 12) :version 'bf2))
+          ((equal magic "VimCrypt~02!")
+           (vimcrypt-bf-decrypt in-passwd (substring in-data 12) :version 'bf1))
+          ((equal (substring magic 0 9) "VimCrypt~")
+           (error "Invalid vimcrypt method '%s'!" magic))
+          (t (error "Invalid file: not vimcrypt encrypted!")))))
+
+(defun vimcrypt-decrypt-buffer (buffer)
+  "Decrypt the content of BUFFER in place"
+  (interactive "bBuffer: ")
+  (with-current-buffer (get-buffer buffer)
+    (let ((password (read-passwd "Password: ")))
+      (message "Decrypting...")
+      (let* ((string (buffer-string))
+             (plain (vimcrypt-decrypt password string)))
+        (message "Done.")
+        (erase-buffer)
+        (insert plain)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; TEST
 
 (let (bb)
   (setq bb (blowfish-init (vimcrypt-derive-key "password" "salt")))
